@@ -21,4 +21,66 @@ class RealStateController extends Controller
 
         return response()->json($realState, 200);
     }
+
+    public function show($id)
+    {
+        try {
+            $realState = $this->realState->findOrFail($id); // mass assignment
+
+            return response()->json([
+                    'data' => $realState
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 200);
+        }
+    }
+    public function store(Request $request)
+    {
+        $data = $request->all();
+
+        try {
+            $realState = $this->realState->create($data); // mass assignment
+            return response()->json([
+                'data' => [
+                    'msg' => 'Imóvel cadastrado com sucesso'
+                ]
+                ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 401);
+        }
+    }
+
+    public function update($id, Request $request)
+    {
+        $data = $request->all();
+
+        try {
+            $realState = $this->realState->findOrFail($id); // mass assignment
+            $realState->update($data);
+
+            return response()->json([
+                'data' => [
+                    'msg' => 'Imóvel atualizado com sucesso'
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 401);
+        }    }
+
+    public function destroy($id)
+    {
+        try {
+            $realState = $this->realState->findOrFail($id); // mass assignment
+            $realState->delete($realState);
+
+            return response()->json([
+                'data' => [
+                    'msg' => 'Imóvel removido com sucesso'
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 200);
+        }
+    }
+
 }
