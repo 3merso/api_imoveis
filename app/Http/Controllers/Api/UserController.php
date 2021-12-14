@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Api\ApiMessages;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use App\User;
 
@@ -43,11 +44,22 @@ class UserController extends Controller
             return response()->json($message->getMessage(), 401);
         }
 
+        Validator::make($data, [
+            'phone' => 'required',
+            'mobile_phone' => 'required'
+        ])->validate();
 
         try {
 
             $data['password'] = bcrypt($data['password']);
+
             $user = $this->user->create($data);
+            $user->profile()->create([
+                'phone' => $data['phone'],
+                'mobile_phone' => $data['mobile_phone']
+                ]
+            );
+
             return response()->json([
                 'data' => [
                     'msg' => 'Usuário cadastrado com sucesso'
@@ -68,7 +80,8 @@ class UserController extends Controller
     public function show($id)
     {
         try {
-            $user = $this->user->findOrFail($id);
+            $user = $this->user->with('profile')->findOrFail($id);
+            $user->profile->social_networks = unserialize($user->profile->social_networks);
 
             return response()->json([
                 'data' => $user
@@ -95,9 +108,21 @@ class UserController extends Controller
         } else {
             unset ($data['password']);
         }
+
+        // o profile. indica que está dentro da chave do array
+        Validator::make($data, [
+            'profile.phone' => 'required',
+            'profile.mobile_phone' => 'required'
+        ])->validate();
+
         try {
+            $profile = $data['profile'];
+            $profile['social_networks'] = serialize($profile['social_networks']);
+
             $user = $this->user->findOrFail($id);
             $user->update($data);
+
+            $user->profile()->update($profile);
 
             return response()->json([
                 'data' => [
