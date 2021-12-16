@@ -18,22 +18,27 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->namespace('Api')->group(function () {
+
     Route::name('real_states.')->group(function (){
 
         Route::resource('real-states', 'RealStateController');
-    });
-});
 
-Route::prefix('v1')->namespace('Api')->group(function () {
+    });
+
     Route::name('users.')->group(function (){
 
         Route::resource('users', 'UserController');
     });
-});
 
-Route::prefix('v1')->namespace('Api')->group(function () {
     Route::name('categories.')->group(function (){
         Route::get('categories/{id}/real-states', 'CategoryController@realState');
+
         Route::resource('categories', 'CategoryController');
+    });
+
+    Route::name('photos.')->prefix('photos')->group(function() {
+        Route::delete('/{id}', 'RealStatePhotoController@remove')->name('delete');
+
+        Route::put('/set-thumb/{photoId}/{realStateId}', 'RealStatePhotoController@setThumb')->name('setThumb');
     });
 });

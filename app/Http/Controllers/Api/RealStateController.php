@@ -26,7 +26,8 @@ class RealStateController extends Controller
     public function show($id)
     {
         try {
-            $realState = $this->realState->findOrFail($id); // mass assignment
+
+            $realState = $this->realState->with('photos')->findOrFail($id); // mass assignment
 
             return response()->json([
                     'data' => $realState
@@ -37,17 +38,29 @@ class RealStateController extends Controller
         }
     }
 
+
+
     public function store(RealStateRequest $request)
     {
         $data = $request->all();
+        $images = $request->file('images');
 
         try {
 
             $realState = $this->realState->create($data); // mass assignment
-
             // salvando a relação
             if (isset($data['categories']) && count($data['categories'])) {
                 $realState->categories()->sync($data['categories']);
+            }
+
+            if ($images) {
+                $imagesUploaded = [];
+                foreach ($images as $image) {
+                    $path = $image->store('images', 'public');
+                    $imagesUploaded[] = ['photo' => $path, 'is_thumb' => false];
+                }
+
+                $realState->photos()->createMany($imagesUploaded);
             }
             return response()->json([
                 'data' => [
@@ -60,9 +73,13 @@ class RealStateController extends Controller
         }
     }
 
+
+
+
     public function update($id, RealStateRequest $request)
     {
         $data = $request->all();
+        $images = $request->file('images');
 
         try {
             $realState = $this->realState->findOrFail($id); // mass assignment
@@ -71,6 +88,17 @@ class RealStateController extends Controller
             // salvando a relação
             if (isset($data['categories']) && count($data['categories'])) {
                 $realState->categories()->sync($data['categories']);
+            }
+
+            if ($images) {
+                $imagesUploaded = [];
+
+                foreach ($images as $image) {
+                    $path = $image->store('images', 'public');
+                    $imagesUploaded[] = ['photo' => $path, 'is_thumb' => false];
+                }
+
+                $realState->photos()->createMany($imagesUploaded);
             }
 
             return response()->json([
