@@ -12,33 +12,39 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
 Route::prefix('v1')->namespace('Api')->group(function () {
 
-    Route::name('real_states.')->group(function (){
+    Route::post('login', 'Auth\\LoginJwtController@login')->name('login');
 
-        Route::resource('real-states', 'RealStateController');
 
-    });
+    Route::group(['middleware' => ['jwt.auth']], function () {
 
-    Route::name('users.')->group(function (){
 
-        Route::resource('users', 'UserController');
-    });
+        Route::name('real_states.')->group(function (){
 
-    Route::name('categories.')->group(function (){
-        Route::get('categories/{id}/real-states', 'CategoryController@realState');
+            Route::resource('real-states', 'RealStateController');
 
-        Route::resource('categories', 'CategoryController');
-    });
+        });
 
-    Route::name('photos.')->prefix('photos')->group(function() {
-        Route::delete('/{id}', 'RealStatePhotoController@remove')->name('delete');
+        Route::name('users.')->group(function (){
 
-        Route::put('/set-thumb/{photoId}/{realStateId}', 'RealStatePhotoController@setThumb')->name('setThumb');
+            Route::resource('users', 'UserController');
+        });
+
+        Route::name('categories.')->group(function (){
+            Route::get('categories/{id}/real-states', 'CategoryController@realState');
+
+            Route::resource('categories', 'CategoryController');
+        });
+
+        Route::name('photos.')->prefix('photos')->group(function() {
+            Route::delete('/{id}', 'RealStatePhotoController@remove')->name('delete');
+
+            Route::put('/set-thumb/{photoId}/{realStateId}', 'RealStatePhotoController@setThumb')->name('setThumb');
+        });
     });
 });
