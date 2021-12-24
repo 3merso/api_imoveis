@@ -18,16 +18,16 @@ class RealStateController extends Controller
 
     public function index()
     {
-        $realState = $this->realState->paginate('10');
+        $realStates = auth('api')->user()->real_state()->paginate(10);
 
-        return response()->json($realState, 200);
+        return response()->json($realStates, 200);
     }
 
     public function show($id)
     {
         try {
 
-            $realState = $this->realState->with('photos')->findOrFail($id); // mass assignment
+            $realState = auth('api')->user()->real_state()->with('photos')->findOrFail($id); // mass assignment
 
             return response()->json([
                     'data' => $realState
@@ -39,13 +39,13 @@ class RealStateController extends Controller
     }
 
 
-
     public function store(RealStateRequest $request)
     {
         $data = $request->all();
         $images = $request->file('images');
 
         try {
+            $data['user_id'] = auth('api')->user()->id;
 
             $realState = $this->realState->create($data); // mass assignment
             // salvando a relação
@@ -82,7 +82,7 @@ class RealStateController extends Controller
         $images = $request->file('images');
 
         try {
-            $realState = $this->realState->findOrFail($id); // mass assignment
+            $realState = auth('api')->user()->real_state()->findOrFail($id); // mass assignment
             $realState->update($data);
 
             // salvando a relação
@@ -112,10 +112,14 @@ class RealStateController extends Controller
         }
     }
 
+
+
     public function destroy($id)
     {
         try {
-            $realState = $this->realState->findOrFail($id); // mass assignment
+
+            $realState = auth('api')->user()->real_state()->findOrFail($id); // mass assignment
+
             $realState->delete($realState);
 
             return response()->json([
