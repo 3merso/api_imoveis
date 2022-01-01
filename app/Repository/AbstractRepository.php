@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 abstract class AbstractRepository
 {
-    private $model;
+    protected $model;
 
     public function __construct(Model $model)
     {
@@ -21,7 +21,7 @@ abstract class AbstractRepository
     public function selectCondition($condition)
     {
         $expressions = explode(';', $condition);
-
+//var_dump($expressions);die();
         foreach ($expressions as $e) {
             $exp = explode(':', $e);
             $this->model = $this->model->where($exp[0], $exp[1], $exp[2]);

@@ -24,6 +24,8 @@ Route::prefix('v1')->namespace('Api')->group(function () {
 
     Route::get('search', 'RealStateSearchController@index')->name('search');
 
+    Route::get('search/{real_state_id}', 'RealStateSearchController@show')->name('search_single');
+
     Route::group(['middleware' => ['jwt.auth']], function () {
 
 
